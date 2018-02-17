@@ -1,13 +1,16 @@
 const get = param => window.localStorage.getItem(param)
 const set = (key, value) => window.localStorage.setItem(key, JSON.stringify(value))
 
+const BASE_URL = 'https://api.getir.in'
+
 const state = {
   logged: get('logged') || false,
   location: get('location') || {},
   init: false,
   token: get('token') || null,
   username: get('username') || '',
-  items: get('items') || []
+  items: get('items') || [],
+  order: get('order') || []
 }
 
 const getters = {
@@ -27,14 +30,16 @@ const getters = {
 }
 
 const mutations = {
-  logIn: (state, {token, username}) => {
+  logIn: (state, {token, username, order}) => {
     state.token = token
+    state.order = order
     state.username = username
     state.logged = true
 
     set('token', token)
     set('username', username)
     set('logged', true)
+    set('order', order)
   },
   setLocation: (state, obj) => {
     state.init = true
@@ -49,7 +54,7 @@ const mutations = {
 
 const actions = {
   async logIn (context, {username, password}) {
-    const {token} = await fetch('https://api.getir.in/user/login',
+    const {token} = await fetch(`${BASE_URL}/user/login`,
       {
           headers: {
             'Accept': 'application/json',
@@ -60,18 +65,29 @@ const actions = {
       })
       .then(res => res.json())
       .catch(console.log)
-      vue.$f7.loginScreen.close('#login-screen', true)
-    context.commit('logIn', {token, username})
+
+    vue.$f7.loginScreen.close('#login-screen', true)
+    const order = await fetch(`${BASE_URL}/order/list`, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+        method: "POST"
+    })
+    .then(res => res.json())
+    .catch(console.log)
+    context.commit('logIn', {token, username, order})
   },
   location (context, obj) {
     context.commit('setLocation', obj)
   },
   async getInitialData (context) {
-    const items = await fetch('https://api.getir.in/product')
+    const items = await fetch(`${BASE_URL}/product`)
       .then(res => res.json())
       .catch(console.log)
     context.commit('init', items)
-  }
+  },
 }
 
 export default {

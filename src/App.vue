@@ -51,6 +51,7 @@ export default {
   },
   created() {
     this.$store.dispatch('getInitialData')
+    this.$store.dispatch('getOrders')
   }
 }
 </script>
