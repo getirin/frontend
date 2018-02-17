@@ -1,1 +1,9 @@
 /* Your app styles here */
+
+.item-title {
+  font-weight: 333.333333;
+}
+
+.numeric-cell {
+  text-align: center;
+}

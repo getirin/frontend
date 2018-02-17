@@ -48,7 +48,7 @@
   >
         <h3 style="
           font-weight: lighter;
-          margin-bottom: -5px;">Alışveriş listelerim</h3>
+          margin-bottom: -10px;">Alışveriş listelerim</h3>
         <f7-list accordion style="width: 100%" inset>
           <f7-list-item
             accordion-item
@@ -73,9 +73,9 @@
                     </thead>
                     <tbody>
                       <tr v-for="item in list.items">
-                        <td class="label-cell">{{ item.title }}</td>
-                        <td class="label-cell" style="margin-left: -20px">{{ item.count }}</td>
-                        <td class="numeric-cell">{{ item.price }} ₺</td>
+                        <td class="label-cell">{{ getItem(item.id).name }}</td>
+                        <td class="numeric-cell">{{ item.count }}</td>
+                        <td class="numeric-cell">{{ getItem(item.id).price }} ₺</td>
                       </tr>
                     </tbody>
                     <tfoot>
@@ -125,8 +125,10 @@ export default {
         this.$f7.loginScreen.open('#login-screen')
       }
     },
-    getItemName (itemId) {
-      return this.items.find(i => i.id === itemId).name
+    getItem (itemId) {
+      const item = this.items.find(i => i.product === itemId)
+      console.log(item, 'item');
+      return item
     }
   },
   computed: {
