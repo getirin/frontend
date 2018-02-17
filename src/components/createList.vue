@@ -112,29 +112,7 @@
               full_adress: 'İzmir'
             }
           }
-        ],
-        // items: [
-        //   {
-        //     id: 1,
-        //     title: 'Süt',
-        //     price: 1
-        //   },
-        //   {
-        //     id: 2,
-        //     title: 'Kola',
-        //     price: 2
-        //   },
-        //   {
-        //     id: 3,
-        //     title: 'Çikolata',
-        //     price: 3
-        //   },
-        //   {
-        //     id: 4,
-        //     title: 'Dondurma',
-        //     price: 2
-        //   },
-        // ]
+        ]
       }
     },
     methods: {
@@ -148,7 +126,7 @@
         this.locationPicker = null
         this.selectedLocation = {}
       },
-      putOrder () {
+      async putOrder () {
         if (this.order.length === 0 || Object.keys(this.selectedLocation).length === 0) {
           this.$f7.dialog.alert('Lütfen adresi ve ürünleri seçiniz')
           return
@@ -157,10 +135,60 @@
           this.isSubmitted = true
           this.isProcessing = true
           console.log('ORDER', this.order);
-          console.log('LOCATION', this.selectedLocation);
-          console.log('TOTAL', this.totalOrderPrice);
+          console.log('LOCATION', this.selectedLocation)
+          console.log('TOTAL', this.totalOrderPrice)
+          let {token, username} = this.$store.state
+          let body = {
+            "title": `alışveriş listem ${new Date()}`,
+            "items": this.order.map(o => {
+              return {
+                product: o.id,
+                count: o.count
+              }
+            }),
+            "address": this.selectedLocation,
+            "destination": {
+              "lat": this.selectedLocation.latitude,
+              "lng": this.selectedLocation.longitude
+            },
+            "status": 0
+          }
+          const order = await fetch(`${BASE_URL}/order`, {
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token,
+              },
+              method: "PUT",
+              body: JSON.stringify(body)
+          })
+          .then(res => res.json())
+          .then(({id, createdAt} )=> {
+            body.createdAt = createdAt
+            body.updatedAt = createdAt
+            body.id = id
+            this.$store.dispatch('addOrder', body)
+          })
+          .catch(console.log)
 
-          // SEND HERE
+          // {
+          //   "title": `${this.$store.state.username} - ${moment(new Date()).from('now')} önce oluşturuldu.`,
+          //   "items": this.order.map(o => {
+          //     return {
+          //       product: o.id,
+          //       count: o.count
+          //     }
+          //   }),
+          //   "address": this.selectedLocation,
+          //   "destination": {
+          //     "lat": this.selectedLocation.latitude,
+          //     "lng": this.selectedLocation.longitude
+          //   },
+          //   "status": 0,
+          //   "totalPrice": this.totalOrderPrice
+          // }
+          // console.log(order);
+
 
           setTimeout(() => {
             this.isProcessing = false

@@ -55,11 +55,11 @@
           >
             <f7-accordion-content>
               <f7-block block block-strong>
-                <p>Alışveriş listeniz {{ list.updatedAt | moment("from", "now") }} önce {{ list.status ? 'teslim edildi' : 'iptal edildi' }}</p>
+                <p>Alışveriş listeniz {{ list.createdAt | moment("from", "now") }} önce {{ list.status ? 'teslim edildi' : 'iptal edildi' }}</p>
 
-                <p v-if="list.status !== 0">Alışverişinizi gerçekleştiren kurye:
+                <!-- <p v-if="list.status !== 0">Alışverişinizi gerçekleştiren kurye:
                   <f7-link :href="carrierPath(list.carrier)">{{ list.carrier.name }}</f7-link>
-                </p>
+                </p> -->
                 <div class="data-table">
                   <table>
                     <thead>
@@ -73,7 +73,7 @@
                       <tr v-for="item in list.items">
                         <td class="label-cell">{{ getItem(item.id).name }}</td>
                         <td class="numeric-cell">{{ item.count }}</td>
-                        <td class="numeric-cell">{{ getItem(item.id).price }} ₺</td>
+                        <td class="numeric-cell">{{ getItem(item.id).price * item.count }} ₺</td>
                       </tr>
                     </tbody>
                     <tfoot>
@@ -124,9 +124,7 @@ export default {
       }
     },
     getItem (itemId) {
-      const item = this.items.find(i => i.product === itemId)
-      console.log(item, 'item');
-      return item
+      return this.items.find(i => i.product === itemId)
     }
   },
   computed: {
@@ -184,67 +182,15 @@ export default {
       ],
       zoom: 13,
       options: {
-          disableDefaultUI: true,
-          zoomControl: false,
-          zoomControlOptions: {
-              position: 6
-          },
-          streetViewControl: false,
-          scrollwheel: true,
-          styles: [ { "featureType": "landscape.man_made", "elementType": "geometry", "stylers": [ { "color": "#f7f1df" } ] }, { "featureType": "landscape.natural", "elementType": "geometry", "stylers": [ { "color": "#d0e3b4" } ] }, { "featureType": "landscape.natural.terrain", "elementType": "geometry", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi.business", "elementType": "all", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi.medical", "elementType": "geometry", "stylers": [ { "color": "#fbd3da" } ] }, { "featureType": "poi.park", "elementType": "geometry", "stylers": [ { "color": "#bde6ab" } ] }, { "featureType": "road", "elementType": "geometry.stroke", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road.highway", "elementType": "geometry.fill", "stylers": [ { "color": "#ffe15f" } ] }, { "featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [ { "color": "#efd151" } ] }, { "featureType": "road.arterial", "elementType": "geometry.fill", "stylers": [ { "color": "#ffffff" } ] }, { "featureType": "road.local", "elementType": "geometry.fill", "stylers": [ { "color": "black" } ] }, { "featureType": "transit.station.airport", "elementType": "geometry.fill", "stylers": [ { "color": "#cfb2db" } ] }, { "featureType": "water", "elementType": "geometry", "stylers": [ { "color": "#a2daf2" } ] } ]
+        disableDefaultUI: true,
+        zoomControl: false,
+        zoomControlOptions: {
+            position: 6
         },
-      // lists: [
-      //   {
-      //     id: 1,
-      //     title: `Alışveriş listem 1`,
-      //     date: new Date(),
-      //     status: true,
-      //     items: [
-      //       {
-      //         id: 'item1',
-      //         name: 'Süt',
-      //         price: 1,
-      //         count: 1
-      //       },
-      //       {
-      //         id: 'item2',
-      //         name: 'Çikolata',
-      //         price: 4,
-      //         count: 2
-      //       }
-      //     ],
-      //     carrier: {
-      //       id: '1abc',
-      //       name: 'Çağatay Çalı',
-      //       slug: 'cagataycali'
-      //     }
-      //   },
-      //   {
-      //     id: 2,
-      //     title: `Alışveriş listem 2`,
-      //     date: new Date(),
-      //     status: false,
-      //     items: [
-      //       {
-      //         id: 'item3',
-      //         name: 'Kola',
-      //         price: 4,
-      //         count: 2
-      //       },
-      //       {
-      //         id: 'item4',
-      //         name: 'Çikolata',
-      //         price: 2,
-      //         count: 2
-      //       }
-      //     ],
-      //     carrier: {
-      //       id: '1cba',
-      //       name: 'Yiğitcan Uçum',
-      //       slug: 'yigitcanucum'
-      //     }
-      //   }
-      // ]
+        streetViewControl: false,
+        scrollwheel: true,
+        styles: [ { "featureType": "landscape.man_made", "elementType": "geometry", "stylers": [ { "color": "#f7f1df" } ] }, { "featureType": "landscape.natural", "elementType": "geometry", "stylers": [ { "color": "#d0e3b4" } ] }, { "featureType": "landscape.natural.terrain", "elementType": "geometry", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi.business", "elementType": "all", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi.medical", "elementType": "geometry", "stylers": [ { "color": "#fbd3da" } ] }, { "featureType": "poi.park", "elementType": "geometry", "stylers": [ { "color": "#bde6ab" } ] }, { "featureType": "road", "elementType": "geometry.stroke", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road.highway", "elementType": "geometry.fill", "stylers": [ { "color": "#ffe15f" } ] }, { "featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [ { "color": "#efd151" } ] }, { "featureType": "road.arterial", "elementType": "geometry.fill", "stylers": [ { "color": "#ffffff" } ] }, { "featureType": "road.local", "elementType": "geometry.fill", "stylers": [ { "color": "black" } ] }, { "featureType": "transit.station.airport", "elementType": "geometry.fill", "stylers": [ { "color": "#cfb2db" } ] }, { "featureType": "water", "elementType": "geometry", "stylers": [ { "color": "#a2daf2" } ] } ]
+      }
     }
   }
 }

@@ -1572,6 +1572,10 @@ deep-extend@~0.4.0:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/deep-extend/-/deep-extend-0.4.2.tgz#48b699c27e334bf89f10892be432f6e4c7d34a7f"
 
+deepmerge@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-2.0.1.tgz#25c1c24f110fb914f80001b925264dd77f3f4312"
+
 defined@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/defined/-/defined-1.0.0.tgz#c98d9bcef75674188e110969151199e39b1fa693"
@@ -4357,6 +4361,10 @@ shelljs@^0.7.8:
     interpret "^1.0.0"
     rechoir "^0.6.2"
 
+shvl@^1.1.1:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/shvl/-/shvl-1.2.0.tgz#5e2de474c68b8430602689a7d35100ad2cb33fec"
+
 signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
@@ -4940,6 +4948,10 @@ vue-moment@^3.2.0:
   dependencies:
     moment "^2.11.1"
 
+vue-persist@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/vue-persist/-/vue-persist-0.4.0.tgz#88aeabcdf5c65704363f585e03ba7a591783052c"
+
 vue-style-loader@^3.0.0, vue-style-loader@^3.0.3:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/vue-style-loader/-/vue-style-loader-3.1.2.tgz#6b66ad34998fc9520c2f1e4d5fa4091641c1597a"
@@ -4970,6 +4982,13 @@ vue2-google-maps@^0.8.6:
 vue@^2.5.2:
   version "2.5.13"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.5.13.tgz#95bd31e20efcf7a7f39239c9aa6787ce8cf578e1"
+
+vuex-persistedstate@^2.4.2:
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/vuex-persistedstate/-/vuex-persistedstate-2.4.2.tgz#a8caf63b07ce4bdff6d82b29634c051ead382bf3"
+  dependencies:
+    deepmerge "^2.0.1"
+    shvl "^1.1.1"
 
 vuex@^3.0.1:
   version "3.0.1"

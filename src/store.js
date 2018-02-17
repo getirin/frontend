@@ -1,16 +1,17 @@
+import createPersistedState from 'vuex-persistedstate'
 const get = param => window.localStorage.getItem(param)
 const set = (key, value) => window.localStorage.setItem(key, JSON.stringify(value))
 
-const BASE_URL = 'https://api.getir.in'
+window.BASE_URL = 'https://api.getir.in'
 
 const state = {
-  logged: get('logged') || false,
-  location: JSON.parse(get('location')) || {},
+  logged: false,
+  location: {},
   init: false,
-  token: get('token') || null,
-  username: get('username') || '',
-  items: JSON.parse(get('items')) || [],
-  order: JSON.parse(get('order')) || []
+  token: null,
+  username: '',
+  items: [],
+  order: []
 }
 
 const getters = {
@@ -38,20 +39,18 @@ const mutations = {
     state.order = order
     state.username = username
     state.logged = true
-
-    set('token', token)
-    set('username', username)
-    set('logged', true)
-    set('order', order)
   },
   setLocation: (state, obj) => {
     state.init = true
     state.location = obj
-    set('location', obj)
   },
   init: (state, items) => {
     state.items = items
-    set('items', items)
+  },
+  addOrder: (state, order) => {
+    let orders = state.order;
+    orders.push(order)
+    state.order = orders;
   }
 }
 
@@ -76,7 +75,7 @@ const actions = {
           'Content-Type': 'application/json',
           'Authorization': token,
         },
-        method: "POST"
+        method: "GET"
     })
     .then(res => res.json())
     .catch(console.log)
@@ -91,11 +90,15 @@ const actions = {
       .catch(console.log)
     context.commit('init', items)
   },
+  addOrder (context, order) {
+    context.commit('addOrder', order)
+  }
 }
 
 export default {
   state,
   getters,
   mutations,
-  actions
+  actions,
+  plugins: [createPersistedState()]
 }
