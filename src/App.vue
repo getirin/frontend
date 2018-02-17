@@ -2,7 +2,7 @@
   <div id="app">
     <f7-statusbar></f7-statusbar>
 
-    <f7-view id="main-view" url="/" main></f7-view>
+    <f7-view id="main-view" url="/" main layout="dark" theme="gray"></f7-view>
 
     <f7-login-screen id="login-screen">
       <f7-view>

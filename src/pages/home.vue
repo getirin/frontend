@@ -36,19 +36,17 @@
     </google-map>
     <div v-if="isLoggedIn">
       <div class="display-flex"
-      style=
-      "
-        flex: 1;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 55%;
-      "
-  >
-        <h3 style="
-          font-weight: lighter;
-          margin-bottom: -10px;">Alışveriş listelerim</h3>
+        style=
+          "
+            flex: 1;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 55%;
+          "
+        >
+        <h3 class="order-list">Alışveriş listelerim</h3>
         <f7-list accordion style="width: 100%" inset>
           <f7-list-item
             accordion-item
