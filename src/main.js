@@ -34,6 +34,7 @@ Vue.use(Moment, {
 
 // Init Google Maps
 Vue.use(VueGoogleMaps, {
+  installComponents: true,
   load: {
     key: 'AIzaSyA8VI7O2qYgTBk6Fymhm-pUm0Qq42IZOSA',
     libraries: 'places,drawing,visualization'
@@ -46,6 +47,7 @@ Vue.use(Framework7Vue, Framework7)
 // Initial G-* things.
 Vue.component('google-map', VueGoogleMaps.Map)
 Vue.component('google-marker', VueGoogleMaps.Marker)
+Vue.component('google-cluster', VueGoogleMaps.Cluster)
 
 // Bind store to vuex
 const store = new Vuex.Store(storeOptions)

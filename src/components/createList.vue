@@ -3,16 +3,25 @@
     <f7-page>
       <f7-navbar title="Alışveriş Listesi Oluştur">
         <f7-nav-right>
-          <f7-link popup-close>Kapat</f7-link>
+          <f7-link popup-close @click="clearOrderCreatePopup">Kapat</f7-link>
         </f7-nav-right>
       </f7-navbar>
-      <f7-block>
+      <div v-if="isProcessing" class="display-flex" style="flex:1;align-items: center;justify-content: center;height: 50%">
+        <f7-progressbar infinite color="multi"></f7-progressbar>
+        <f7-preloader style="flex:1, align-items: center;justify-content: center;" color="green" size="44px"></f7-preloader>
+      </div>
+      <div v-if="isDone">
+        <h4>Başarılı</h4>
+        <p>Alışveriş listen başarıyla oluşturuldu, etrafındaki kuryelere iletildi..</p>
+        <p>Alışveriş listeni bir kurye hazırlamaya başlarsa anlık olarak takip edebileceksin.</p>
+      </div>
+      <f7-block v-if="!isSubmitted" inset>
         Alışveriş listenizi şu anki konumunuza göre veya daha önceki konumlarınıza göre verebilirsiniz.
         <f7-button big style="margin-top: 5px" @click="locationPicker.open()">Konum seç</f7-button>
-
+          <div class="block-title" style="font-weight: bold" v-if="this.selectedLocation">{{this.selectedLocation.full_adress}}</div>
 
           <div class="block-title" style="text-transform: none !important;">Ürün seçimi</div>
-          <div class="list no-hairlines-md">
+          <div class="list no-hairlines-md inset">
             <ul>
               <li>
                 <div class="item-content item-input">
@@ -57,21 +66,47 @@
         </div>
       </f7-block>
     </f7-page>
-    <f7-fab color="pink">
+    <f7-fab color="pink" @click="putOrder()">
       <f7-icon f7="check"></f7-icon>
     </f7-fab>
   </f7-view>
 </template>
 
 <script>
+  import locationDetail from '../util/location'
+
   export default {
     data() {
       return {
         order: [],
         totalOrderPrice: 0,
         itemPicker: null,
+        isSubmitted: false,
+        isProcessing: false,
+        isDone: false,
         locationPicker: null,
+        selectedLocation: {},
         location: null,
+        orderList: [
+          {
+            id: "123",
+            title: "Alışveriş 1",
+            location: {
+              latitude: 12,
+              longitude: 12,
+              full_adress: 'Denizli'
+            }
+          },
+          {
+            id: "321",
+            title: "Alışveriş 2",
+            location: {
+              latitude: 12,
+              longitude: 12,
+              full_adress: 'İzmir'
+            }
+          }
+        ],
         items: [
           {
             id: 1,
@@ -97,6 +132,37 @@
       }
     },
     methods: {
+      clearOrderCreatePopup () {
+        this.order = []
+        this.totalOrderPrice = 0
+        this.itemPicker = null
+        this.isSubmitted = false
+        this.isProcessing = false
+        this.isDone = false
+        this.locationPicker = null
+        this.selectedLocation = {}
+      },
+      putOrder () {
+        if (this.order.length === 0 || Object.keys(this.selectedLocation).length === 0) {
+          alert('Lütfen adresi ve ürünleri seçiniz..')
+          return
+        }
+        if (!this.isSubmitted) {
+          this.isSubmitted = true
+          this.isProcessing = true
+          console.log('ORDER', this.order);
+          console.log('LOCATION', this.selectedLocation);
+          console.log('TOTAL', this.totalOrderPrice);
+
+          setTimeout(() => {
+            this.isProcessing = false
+            this.isDone = true
+          }, 5 * 1000);
+        } else {
+          return
+        }
+
+      },
       removeItemFromOrderList (item) {
         const originalItem = this.items.find(i => i.title === item.title)
         let order = this.order.find(o => o.title === item.title)
@@ -130,7 +196,21 @@
             price: (count * item.price)
           })
         }
-      }
+      },
+      getCurrentLocation () {
+        if (!navigator.geolocation) {
+          alert('Tarayıcının bildirim özelliği malesef bulunmamakta. Tüm özelliklerimizi kullanamayacak olmana üzüldük.');
+          return;
+        }
+        navigator.geolocation.watchPosition( async ({coords: {latitude, longitude}}) => {
+          this.location = await locationDetail({latitude, longitude})
+          this.$store.dispatch('location', this.location);
+        }, ({code, message}) => {
+          if (code === 1) {
+            alert(`Lokasyon iznini almadan sana yardımcı olamam :(`)
+          }
+        });
+      },
     },
     watch: {
       order: function () {
@@ -140,7 +220,7 @@
       }
     },
     created() {
-      window.order = this.order
+      this.getCurrentLocation()
       setTimeout( () => {
         this.itemPicker = this.$f7.picker.create({
            inputEl: '#pick-item',
@@ -157,6 +237,15 @@
              ]
          });
 
+         let orderList = this.orderList.map(o => {
+           return {
+             text: o.title,
+             onClick: () => {
+               this.selectedLocation = o.location
+             },
+           }
+         })
+
          this.locationPicker = this.$f7.actions.create({
             buttons: [
               [
@@ -165,9 +254,9 @@
                   label: true
                 },
                 {
-                  text: 'Şu anki konumuma',
-                  onClick: function () {
-                    alert('Şu anki konumu al..')
+                  text: 'Şu anki konumuma istiyorum',
+                  onClick: () => {
+                    this.selectedLocation = this.$store.state.location
                   }
                 }
               ],
@@ -176,18 +265,7 @@
                   text: 'Son adresler',
                   label: true
                 },
-                {
-                  text: 'Alışveriş 1 - 1 hafta önce',
-                  onClick: function () {
-                    alert('Alışveriş 1..')
-                  }
-                },
-                {
-                  text: 'Alışveriş 2 - 3 hafta önce',
-                  onClick: function () {
-                    alert('Alışveriş 2..')
-                  }
-                }
+                ...orderList
               ],
               [
                 {
@@ -197,8 +275,6 @@
               ]
             ],
           });
-         window.itemPicker = this.itemPicker
-         window.locationPicker = this.locationPicker
       }, 10);
 
     }

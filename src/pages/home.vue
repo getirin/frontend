@@ -1,17 +1,21 @@
 <template>
   <f7-page>
-    <f7-navbar>
-      <f7-nav-title>Getir.in</f7-nav-title>
-      <f7-nav-right>
-        <f7-link icon-if-ios="f7:menu" icon-if-md="material:menu" panel-open="right"></f7-link>
-      </f7-nav-right>
-    </f7-navbar>
+    <div v-if="!isInitialized">
+      <f7-progressbar infinite color="multi"></f7-progressbar>
+    </div>
     <google-map
-      :center="center"
-      :zoom="7"
+      :center="isInitialized ? currentLocation : {lat: 41.0781274, lng: 29.0224651}"
+      :zoom="zoom"
       :options="options"
       :style="mapSize"
+      @zoom_changed="zoomChange($event)"
       >
+      <google-marker
+        :position="isInitialized ? currentLocation : {lat: 41.0781274, lng: 29.0224651}"
+        :clickable="false"
+        :draggable="false"
+        >
+      </google-marker>
       <google-marker
         v-for="m in markers"
         :key="m.id"
@@ -30,11 +34,11 @@
         align-items: center;
         justify-content: center;
         width: 100%;
-        height: 50%;
+        height: 55%;
       "
   >
         <h3>Geçmiş alışverişlerim</h3>
-        <f7-list accordion>
+        <f7-list accordion style="width: 100%" inset>
           <f7-list-item
             accordion-item
             v-for="list in lists"
@@ -92,6 +96,9 @@ import CreateList from '../components/createList'
 
 export default {
   methods: {
+    zoomChange(event) {
+      this.zoom = event;
+    },
     sum (list) {
       return list.items
         .map(i => i.price)
@@ -110,7 +117,9 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'isLoggedIn'
+      'isLoggedIn',
+      'isInitialized',
+      'currentLocation'
     ]),
     mapSize: function () {
       return `height: ${this.isLoggedIn ? 50 : 100}%`
@@ -157,14 +166,16 @@ export default {
           }
         }
       ],
+      zoom: 13,
       options: {
           disableDefaultUI: true,
           zoomControl: false,
           zoomControlOptions: {
-              position: 12
+              position: 6
           },
           streetViewControl: false,
-          scrollwheel: true
+          scrollwheel: true,
+          styles: [ { "featureType": "landscape.man_made", "elementType": "geometry", "stylers": [ { "color": "#f7f1df" } ] }, { "featureType": "landscape.natural", "elementType": "geometry", "stylers": [ { "color": "#d0e3b4" } ] }, { "featureType": "landscape.natural.terrain", "elementType": "geometry", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi.business", "elementType": "all", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi.medical", "elementType": "geometry", "stylers": [ { "color": "#fbd3da" } ] }, { "featureType": "poi.park", "elementType": "geometry", "stylers": [ { "color": "#bde6ab" } ] }, { "featureType": "road", "elementType": "geometry.stroke", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road.highway", "elementType": "geometry.fill", "stylers": [ { "color": "#ffe15f" } ] }, { "featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [ { "color": "#efd151" } ] }, { "featureType": "road.arterial", "elementType": "geometry.fill", "stylers": [ { "color": "#ffffff" } ] }, { "featureType": "road.local", "elementType": "geometry.fill", "stylers": [ { "color": "black" } ] }, { "featureType": "transit.station.airport", "elementType": "geometry.fill", "stylers": [ { "color": "#cfb2db" } ] }, { "featureType": "water", "elementType": "geometry", "stylers": [ { "color": "#a2daf2" } ] } ]
         },
       lists: [
         {
@@ -222,3 +233,21 @@ export default {
   }
 }
 </script>
+
+<style media="screen">
+  .gm-style-cc {
+    display: none;
+  }
+  .gm-style-iw {
+    color: #353535
+  }
+@media screen and (max-width: 500px) {
+  .gm-style-cc {
+    display: none;
+  }
+  .gm-style-iw {
+    color: #353535
+  }
+  img[src="https://maps.gstatic.com/mapfiles/api-3/images/google_white5_hdpi.png"]{display:none}
+}
+</style>
