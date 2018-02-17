@@ -7,42 +7,34 @@
         </f7-nav-right>
       </f7-navbar>
       <f7-block>
-        Alışveriş listenizi şuan ki konumunuza göre veya daha önceki konumlarınıza göre verebilirsiniz.
-        <f7-list form>
-          <f7-list-item smart-select :smart-select-params="{ closeOnSelect: true }" pageBackLinkText="Geri"  title="Ürünlerinizi nereye getirelim?">
-            <select name="location">
-              <option value="currentLocation">Şu anki konum</option>
-              <option value="list1">Alışverış 1</option>
-              <option value="list2">Alışverış 2</option>
-              <option value="list3">Alışverış 3</option>
-              <option value="list4">Alışverış 4</option>
-            </select>
-          </f7-list-item>
+        Alışveriş listenizi şu anki konumunuza göre veya daha önceki konumlarınıza göre verebilirsiniz.
+        <f7-button big style="margin-top: 5px" @click="locationPicker.open()">Konum seç</f7-button>
 
-          <div class="block-title">Ürün seçimi</div>
-            <div class="list no-hairlines-md">
-              <ul>
-                <li>
-                  <div class="item-content item-input">
-                    <div class="item-inner">
-                      <div class="item-input-wrap">
-                        <input type="text" placeholder="Ne arzu edersiniz?" readonly="readonly" id="demo-picker-describe"/>
-                      </div>
+
+          <div class="block-title" style="text-transform: none !important;">Ürün seçimi</div>
+          <div class="list no-hairlines-md">
+            <ul>
+              <li>
+                <div class="item-content item-input">
+                  <div class="item-inner">
+                    <div class="item-input-wrap">
+                      <input type="text" placeholder="Ne arzu edersiniz?" readonly="readonly" id="pick-item"/>
                     </div>
                   </div>
-                </li>
-              </ul>
-              <f7-button style="margin-top: 5px" @click="addItem(this)">Ürünü alışveriş listeme ekle</f7-button>
-            </div>
+                </div>
+              </li>
+            </ul>
+            <f7-button big style="margin-top: 5px" @click="addItem(this)">Ürünü alışveriş listeme ekle</f7-button>
+          </div>
         </f7-list>
-        <div class="data-table">
+        <div class="data-table" v-if="totalOrderPrice > 0">
           <table>
             <thead>
               <tr>
                 <th class="label-cell">Ürün</th>
                 <th class="numeric-cell">Birim</th>
                 <th class="numeric-cell">Kaldır</th>
-                <th class="numeric-cell">Fiyat (₺)</th>
+                <th class="numeric-cell">Tutar (₺)</th>
               </tr>
             </thead>
             <tbody>
@@ -50,8 +42,6 @@
                 <td class="label-cell">{{ item.title }}</td>
                 <td class="numeric-cell">x{{ item.count }}</td>
                 <td class="numeric-cell" ><f7-button @click="removeItemFromOrderList(item)" style="border: none !important;" icon-f7="delete_round"></f7-button></td>
-
-
                 <td class="numeric-cell">{{ item.price }} ₺</td>
               </tr>
             </tbody>
@@ -79,7 +69,9 @@
       return {
         order: [],
         totalOrderPrice: 0,
-        picker: null,
+        itemPicker: null,
+        locationPicker: null,
+        location: null,
         items: [
           {
             id: 1,
@@ -117,11 +109,11 @@
         }
       },
       addItem () {
-        if (!this.picker.getValue()) {
+        if (!this.itemPicker.getValue()) {
           alert('Lütfen bir ürün seçiniz..')
           return
         }
-        let [title, count] = this.picker.getValue()
+        let [title, count] = this.itemPicker.getValue()
         count = parseFloat(count.split('x')[1])
         const item = this.items.find(i => i.title === title)
         let order = this.order.find(o => o.title === title)
@@ -142,7 +134,6 @@
     },
     watch: {
       order: function () {
-        console.log('SELAM',this.order);
         this.totalOrderPrice = this.order
           .map(o => o.price)
           .reduce((a, b) => a + b, 0)
@@ -151,8 +142,8 @@
     created() {
       window.order = this.order
       setTimeout( () => {
-        this.picker = this.$f7.picker.create({
-           inputEl: '#demo-picker-describe',
+        this.itemPicker = this.$f7.picker.create({
+           inputEl: '#pick-item',
              rotateEffect: true,
              cols: [
                {
@@ -165,7 +156,49 @@
                },
              ]
          });
-         window.picker = this.picker
+
+         this.locationPicker = this.$f7.actions.create({
+            buttons: [
+              [
+                {
+                  text: 'Ürünlerinizi nereye göndermemizi istersiniz?',
+                  label: true
+                },
+                {
+                  text: 'Şu anki konumuma',
+                  onClick: function () {
+                    alert('Şu anki konumu al..')
+                  }
+                }
+              ],
+              [
+                {
+                  text: 'Son adresler',
+                  label: true
+                },
+                {
+                  text: 'Alışveriş 1 - 1 hafta önce',
+                  onClick: function () {
+                    alert('Alışveriş 1..')
+                  }
+                },
+                {
+                  text: 'Alışveriş 2 - 3 hafta önce',
+                  onClick: function () {
+                    alert('Alışveriş 2..')
+                  }
+                }
+              ],
+              [
+                {
+                  text: 'İptal',
+                  color: 'red'
+                }
+              ]
+            ],
+          });
+         window.itemPicker = this.itemPicker
+         window.locationPicker = this.locationPicker
       }, 10);
 
     }
