@@ -21,7 +21,7 @@
           <div class="block-title" style="font-weight: bold" v-if="this.selectedLocation">{{this.selectedLocation.full_adress}}</div>
 
           <div class="block-title" style="text-transform: none !important;">Ürün seçimi</div>
-          <div class="list no-hairlines-md inset">
+          <div class="list no-hairlines-md">
             <ul>
               <li>
                 <div class="item-content item-input">
@@ -48,7 +48,7 @@
             </thead>
             <tbody>
               <tr v-for="item in order">
-                <td class="label-cell">{{ item.title }}</td>
+                <td class="label-cell">{{ item.name }}</td>
                 <td class="numeric-cell">x{{ item.count }}</td>
                 <td class="numeric-cell" ><f7-button @click="removeItemFromOrderList(item)" style="border: none !important;" icon-f7="delete_round"></f7-button></td>
                 <td class="numeric-cell">{{ item.price }} ₺</td>
@@ -73,9 +73,15 @@
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
   import locationDetail from '../util/location'
 
   export default {
+    computed: {
+      ...mapGetters([
+        'items'
+      ]),
+    },
     data() {
       return {
         order: [],
@@ -90,7 +96,7 @@
         orderList: [
           {
             id: "123",
-            title: "Alışveriş 1",
+            name: "Alışveriş 1",
             location: {
               latitude: 12,
               longitude: 12,
@@ -99,7 +105,7 @@
           },
           {
             id: "321",
-            title: "Alışveriş 2",
+            name: "Alışveriş 2",
             location: {
               latitude: 12,
               longitude: 12,
@@ -107,28 +113,28 @@
             }
           }
         ],
-        items: [
-          {
-            id: 1,
-            title: 'Süt',
-            price: 1
-          },
-          {
-            id: 2,
-            title: 'Kola',
-            price: 2
-          },
-          {
-            id: 3,
-            title: 'Çikolata',
-            price: 3
-          },
-          {
-            id: 4,
-            title: 'Dondurma',
-            price: 2
-          },
-        ]
+        // items: [
+        //   {
+        //     id: 1,
+        //     title: 'Süt',
+        //     price: 1
+        //   },
+        //   {
+        //     id: 2,
+        //     title: 'Kola',
+        //     price: 2
+        //   },
+        //   {
+        //     id: 3,
+        //     title: 'Çikolata',
+        //     price: 3
+        //   },
+        //   {
+        //     id: 4,
+        //     title: 'Dondurma',
+        //     price: 2
+        //   },
+        // ]
       }
     },
     methods: {
@@ -154,6 +160,8 @@
           console.log('LOCATION', this.selectedLocation);
           console.log('TOTAL', this.totalOrderPrice);
 
+          // SEND HERE
+
           setTimeout(() => {
             this.isProcessing = false
             this.isDone = true
@@ -164,14 +172,14 @@
 
       },
       removeItemFromOrderList (item) {
-        const originalItem = this.items.find(i => i.title === item.title)
-        let order = this.order.find(o => o.title === item.title)
+        const originalItem = this.items.find(i => i.name === item.name)
+        let order = this.order.find(o => o.name === item.name)
         if (order && order.count > 0) {
           this.$set(order, 'count', --order.count)
           this.$set(order, 'price', order.price - originalItem.price)
           this.totalOrderPrice -= originalItem.price
         } else {
-          this.order = this.order.filter(o => o.title !== item.title)
+          this.order = this.order.filter(o => o.name !== item.name)
         }
       },
       addItem () {
@@ -179,10 +187,10 @@
           alert('Lütfen bir ürün seçiniz..')
           return
         }
-        let [title, count] = this.itemPicker.getValue()
+        let [name, count] = this.itemPicker.getValue()
         count = parseFloat(count.split('x')[1])
-        const item = this.items.find(i => i.title === title)
-        let order = this.order.find(o => o.title === title)
+        const item = this.items.find(i => i.name === name)
+        let order = this.order.find(o => o.name === name)
 
         if (order) {
           this.$set(order, 'count', count + order.count)
@@ -191,7 +199,7 @@
         } else {
           this.order.push({
             id: item.id,
-            title: item.title,
+            name: item.name,
             count,
             price: (count * item.price)
           })
@@ -229,7 +237,7 @@
                {
                  textAlign: 'left',
                  values: this.items
-                  .map(i => i.title)
+                  .map(i => i.name)
                },
                {
                  values: ('x1 x2 x3 x4 x5 x6 x7 x8 x9 x10').split(' ')
@@ -239,7 +247,7 @@
 
          let orderList = this.orderList.map(o => {
            return {
-             text: o.title,
+             text: o.name,
              onClick: () => {
                this.selectedLocation = o.location
              },

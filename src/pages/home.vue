@@ -132,7 +132,7 @@ export default {
     }
   },
   created() {
-    var toastWithCustomButton = this.$f7.toast.create({
+    const loginScreenToast = this.$f7.toast.create({
       text: 'Hoşgeldin, şu anda etrafında 20 adet kuryemiz var, bir alışveriş listesi oluşturup en kısa sürede bunları sana getirebilirler. Hemen tıkla ve giriş yap!',
       closeButton: true,
       closeButtonText: 'Giriş Yap',
@@ -144,7 +144,7 @@ export default {
         }
     });
     if (!this.isLoggedIn) {
-      toastWithCustomButton.open()
+      loginScreenToast.open()
     }
   },
   components: {
@@ -247,13 +247,13 @@ export default {
   .gm-style-iw {
     color: #353535
   }
-@media screen and (max-width: 500px) {
-  .gm-style-cc {
-    display: none;
+  @media screen and (max-width: 500px) {
+    .gm-style-cc {
+      display: none;
+    }
+    .gm-style-iw {
+      color: #353535
+    }
+    img[src="https://maps.gstatic.com/mapfiles/api-3/images/google_white5_hdpi.png"]{display:none}
   }
-  .gm-style-iw {
-    color: #353535
-  }
-  img[src="https://maps.gstatic.com/mapfiles/api-3/images/google_white5_hdpi.png"]{display:none}
-}
 </style>
