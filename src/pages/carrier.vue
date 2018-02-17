@@ -1,7 +1,7 @@
 <template>
   <f7-page>
     <f7-navbar>
-      <f7-nav-title>Getir.in</f7-nav-title>
+      <f7-nav-title>Kurye Detayı</f7-nav-title>
       <f7-nav-right>
         <f7-link icon-if-ios="f7:menu" icon-if-md="material:menu" panel-open="right"></f7-link>
       </f7-nav-right>
@@ -46,27 +46,27 @@
                 <f7-link :href="carrierPath(list.carrier)">{{ list.carrier.name }}</f7-link>
               </p>
               <div class="data-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th class="label-cell">Ürün</th>
-                      <th class="numeric-cell">Fiyat (₺)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="item in list.items">
-                      <td class="label-cell">{{ item.name }}</td>
-                      <td class="numeric-cell">{{ item.price }} ₺</td>
-                    </tr>
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td class="label-cell">Yaklaşık alışveriş tutarı ( ₺ )</td>
-                      <td class="numeric-cell">{{ sum(list) }} ₺</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th class="label-cell">Ürün</th>
+                    <th class="numeric-cell">Fiyat (₺)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in list.items" :key="item.id">
+                    <td class="label-cell">{{ item.name }}</td>
+                    <td class="numeric-cell">{{ item.price }} ₺</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td class="label-cell">Yaklaşık alışveriş tutarı ( ₺ )</td>
+                    <td class="numeric-cell">{{ sum(list) }} ₺</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
             </f7-block>
           </f7-accordion-content>
         </f7-list-item>
@@ -76,14 +76,9 @@
       </f7-fab>
       <!-- <f7-button raised popup-open="#createShoppingListPopup">Alışveriş Listesi Oluştur</f7-button> -->
     </div>
-    <f7-popup id="createShoppingListPopup">
-      <CreateList />
-    </f7-popup>
   </f7-page>
 </template>
 <script>
-import CreateList from '../components/createList'
-
 export default {
   methods: {
     sum (list) {
@@ -95,13 +90,7 @@ export default {
       return `/carrier/${carrier.slug}`
     }
   },
-  created () {
-    console.log(this.$f7);
-  },
-  components: {
-    CreateList
-  },
-  data () {
+  data() {
     return {
       center: {
         lat: 10.0,
