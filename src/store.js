@@ -5,12 +5,12 @@ const BASE_URL = 'https://api.getir.in'
 
 const state = {
   logged: get('logged') || false,
-  location: get('location') || {},
+  location: JSON.parse(get('location')) || {},
   init: false,
   token: get('token') || null,
   username: get('username') || '',
-  items: get('items') || [],
-  order: get('order') || []
+  items: JSON.parse(get('items')) || [],
+  order: JSON.parse(get('order')) || []
 }
 
 const getters = {
@@ -26,7 +26,10 @@ const getters = {
   },
   items (state) {
     return state.items
-  }
+  },
+  order (state) {
+    return state.order
+  },
 }
 
 const mutations = {

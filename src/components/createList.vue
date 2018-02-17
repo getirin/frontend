@@ -150,7 +150,7 @@
       },
       putOrder () {
         if (this.order.length === 0 || Object.keys(this.selectedLocation).length === 0) {
-          alert('Lütfen adresi ve ürünleri seçiniz..')
+          this.$f7.dialog.alert('Lütfen adresi ve ürünleri seçiniz')
           return
         }
         if (!this.isSubmitted) {
@@ -184,7 +184,7 @@
       },
       addItem () {
         if (!this.itemPicker.getValue()) {
-          alert('Lütfen bir ürün seçiniz..')
+          this.$f7.dialog.alert('Lütfen bir ürün seçiniz')
           return
         }
         let [name, count] = this.itemPicker.getValue()
@@ -207,7 +207,7 @@
       },
       getCurrentLocation () {
         if (!navigator.geolocation) {
-          alert('Tarayıcının bildirim özelliği malesef bulunmamakta. Tüm özelliklerimizi kullanamayacak olmana üzüldük.');
+          this.$f7.dialog.alert('Tarayıcının bildirim özelliği malesef bulunmamakta. Tüm özelliklerimizi kullanamayacak olmana üzüldük.')
           return;
         }
         navigator.geolocation.watchPosition( async ({coords: {latitude, longitude}}) => {
@@ -215,7 +215,7 @@
           this.$store.dispatch('location', this.location);
         }, ({code, message}) => {
           if (code === 1) {
-            alert(`Lokasyon iznini almadan sana yardımcı olamam :(`)
+            this.$f7.dialog.alert('Lokasyon iznini almadan sana yardımcı olamam :(')
           }
         });
       },

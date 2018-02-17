@@ -20,9 +20,6 @@
           </f7-list>
           <f7-list>
             <f7-list-button title="Giriş yap" @click="login" @keyup.enter="login"></f7-list-button>
-            <!-- <f7-block-footer>
-              <p>Click Sign In to close Login Screen</p>
-            </f7-block-footer> -->
           </f7-list>
         </f7-page>
       </f7-view>
@@ -51,7 +48,6 @@ export default {
   },
   created() {
     this.$store.dispatch('getInitialData')
-    this.$store.dispatch('getOrders')
   }
 }
 </script>

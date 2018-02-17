@@ -1,5 +1,8 @@
 <template>
   <f7-page>
+    <f7-navbar>
+      <f7-nav-title>Getir.in</f7-nav-title>
+    </f7-navbar>
     <div v-if="!isInitialized">
       <f7-progressbar infinite color="multi"></f7-progressbar>
     </div>
@@ -43,17 +46,20 @@
         height: 55%;
       "
   >
-        <h3>Geçmiş alışverişlerim</h3>
+        <h3 style="
+          font-weight: lighter;
+          margin-bottom: -5px;">Alışveriş listelerim</h3>
         <f7-list accordion style="width: 100%" inset>
           <f7-list-item
             accordion-item
-            v-for="list in lists"
+            v-for="list in order"
             :title="list.title"
           >
             <f7-accordion-content>
               <f7-block block block-strong>
-                <p>Alışveriş listeniz {{ list.date | moment("from", "now") }} önce {{ list.status ? 'teslim edildi' : 'iptal edildi' }}</p>
-                <p>Alışverişinizi gerçekleştiren kurye:
+                <p>Alışveriş listeniz {{ list.updatedAt | moment("from", "now") }} önce {{ list.status ? 'teslim edildi' : 'iptal edildi' }}</p>
+
+                <p v-if="list.status !== 0">Alışverişinizi gerçekleştiren kurye:
                   <f7-link :href="carrierPath(list.carrier)">{{ list.carrier.name }}</f7-link>
                 </p>
                 <div class="data-table">
@@ -67,7 +73,7 @@
                     </thead>
                     <tbody>
                       <tr v-for="item in list.items">
-                        <td class="label-cell">{{ item.name }}</td>
+                        <td class="label-cell">{{ item.title }}</td>
                         <td class="label-cell" style="margin-left: -20px">{{ item.count }}</td>
                         <td class="numeric-cell">{{ item.price }} ₺</td>
                       </tr>
@@ -76,7 +82,7 @@
                       <tr>
                         <td class="label-cell">Alışveriş tutarı</td>
                         <td class="numeric-cell"></td>
-                        <td class="numeric-cell">{{ sum(list) }} ₺</td>
+                        <td class="numeric-cell">{{ list.totalPrice }} ₺</td>
                       </tr>
                     </tfoot>
                   </table>
@@ -88,8 +94,7 @@
         <f7-fab color="green" @click="createShoppingList()">
           <f7-icon f7="address"></f7-icon>
         </f7-fab>
-    </div>
-      <!-- <f7-button raised popup-open="#createShoppingListPopup">Alışveriş Listesi Oluştur</f7-button> -->
+      </div>
     </div>
     <f7-popup id="createShoppingListPopup">
       <CreateList />
@@ -119,13 +124,18 @@ export default {
       } else {
         this.$f7.loginScreen.open('#login-screen')
       }
+    },
+    getItemName (itemId) {
+      return this.items.find(i => i.id === itemId).name
     }
   },
   computed: {
     ...mapGetters([
       'isLoggedIn',
       'isInitialized',
-      'currentLocation'
+      'currentLocation',
+      'order',
+      'items'
     ]),
     mapSize: function () {
       return `height: ${this.isLoggedIn ? 50 : 100}%`
@@ -183,58 +193,58 @@ export default {
           scrollwheel: true,
           styles: [ { "featureType": "landscape.man_made", "elementType": "geometry", "stylers": [ { "color": "#f7f1df" } ] }, { "featureType": "landscape.natural", "elementType": "geometry", "stylers": [ { "color": "#d0e3b4" } ] }, { "featureType": "landscape.natural.terrain", "elementType": "geometry", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi.business", "elementType": "all", "stylers": [ { "visibility": "off" } ] }, { "featureType": "poi.medical", "elementType": "geometry", "stylers": [ { "color": "#fbd3da" } ] }, { "featureType": "poi.park", "elementType": "geometry", "stylers": [ { "color": "#bde6ab" } ] }, { "featureType": "road", "elementType": "geometry.stroke", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road", "elementType": "labels", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road.highway", "elementType": "geometry.fill", "stylers": [ { "color": "#ffe15f" } ] }, { "featureType": "road.highway", "elementType": "geometry.stroke", "stylers": [ { "color": "#efd151" } ] }, { "featureType": "road.arterial", "elementType": "geometry.fill", "stylers": [ { "color": "#ffffff" } ] }, { "featureType": "road.local", "elementType": "geometry.fill", "stylers": [ { "color": "black" } ] }, { "featureType": "transit.station.airport", "elementType": "geometry.fill", "stylers": [ { "color": "#cfb2db" } ] }, { "featureType": "water", "elementType": "geometry", "stylers": [ { "color": "#a2daf2" } ] } ]
         },
-      lists: [
-        {
-          id: 1,
-          title: `Alışveriş listem 1`,
-          date: new Date(),
-          status: true,
-          items: [
-            {
-              id: 'item1',
-              name: 'Süt',
-              price: 1,
-              count: 1
-            },
-            {
-              id: 'item2',
-              name: 'Çikolata',
-              price: 4,
-              count: 2
-            }
-          ],
-          carrier: {
-            id: '1abc',
-            name: 'Çağatay Çalı',
-            slug: 'cagataycali'
-          }
-        },
-        {
-          id: 2,
-          title: `Alışveriş listem 2`,
-          date: new Date(),
-          status: false,
-          items: [
-            {
-              id: 'item3',
-              name: 'Kola',
-              price: 4,
-              count: 2
-            },
-            {
-              id: 'item4',
-              name: 'Çikolata',
-              price: 2,
-              count: 2
-            }
-          ],
-          carrier: {
-            id: '1cba',
-            name: 'Yiğitcan Uçum',
-            slug: 'yigitcanucum'
-          }
-        }
-      ]
+      // lists: [
+      //   {
+      //     id: 1,
+      //     title: `Alışveriş listem 1`,
+      //     date: new Date(),
+      //     status: true,
+      //     items: [
+      //       {
+      //         id: 'item1',
+      //         name: 'Süt',
+      //         price: 1,
+      //         count: 1
+      //       },
+      //       {
+      //         id: 'item2',
+      //         name: 'Çikolata',
+      //         price: 4,
+      //         count: 2
+      //       }
+      //     ],
+      //     carrier: {
+      //       id: '1abc',
+      //       name: 'Çağatay Çalı',
+      //       slug: 'cagataycali'
+      //     }
+      //   },
+      //   {
+      //     id: 2,
+      //     title: `Alışveriş listem 2`,
+      //     date: new Date(),
+      //     status: false,
+      //     items: [
+      //       {
+      //         id: 'item3',
+      //         name: 'Kola',
+      //         price: 4,
+      //         count: 2
+      //       },
+      //       {
+      //         id: 'item4',
+      //         name: 'Çikolata',
+      //         price: 2,
+      //         count: 2
+      //       }
+      //     ],
+      //     carrier: {
+      //       id: '1cba',
+      //       name: 'Yiğitcan Uçum',
+      //       slug: 'yigitcanucum'
+      //     }
+      //   }
+      // ]
     }
   }
 }
