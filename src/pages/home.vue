@@ -22,7 +22,13 @@
         :position="m.position"
         :clickable="true"
         :draggable="false"
-        @click="center=m.position">
+        @click="center=m.position"
+        :icon= "{
+          anchor: {x: m.position.lat, y: m.position.lng},
+          url: `/static/logo.svg`,
+          scaledSize: {b: 'px', f: 'px', height: 60, width: 80}
+        }"
+        >
       </google-marker>
     </google-map>
     <div v-if="isLoggedIn">
@@ -154,15 +160,15 @@ export default {
         {
           id: 1,
           position: {
-            lat: 10.0,
-            lng: 10.0
+            lat: 41.080481,
+            lng: 29.033895
           }
         },
         {
           id: 2,
           position: {
-            lat: 11.0,
-            lng: 11.0
+            lat: 41.078015,
+            lng: 29.029893
           }
         }
       ],
