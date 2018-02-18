@@ -12,7 +12,8 @@ const state = {
   username: '',
   items: [],
   order: [],
-  basket: [] // New basket
+  basket: [], // New basket
+  carriers: []
 }
 
 const getters = {
@@ -32,6 +33,9 @@ const getters = {
   order (state) {
     return state.order
   },
+  getNearByCarriers (state) {
+    return state.carriers
+  }
 }
 
 const mutations = {
@@ -52,6 +56,9 @@ const mutations = {
     let orders = state.order;
     orders.push(order)
     state.order = orders;
+  },
+  setCarriers: (state, carriers) => {
+    state.carriers = carriers
   }
 }
 
@@ -59,24 +66,24 @@ const actions = {
   async logIn (context, {username, password}) {
     const {token} = await fetch(`${BASE_URL}/user/login`,
       {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          method: "POST",
-          body: JSON.stringify({name:username, password})
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: JSON.stringify({name:username, password})
       })
       .then(res => res.json())
       .catch(console.log)
 
     vue.$f7.loginScreen.close('#login-screen', true)
     const order = await fetch(`${BASE_URL}/order/list`, {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': token,
-        },
-        method: "GET"
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': token,
+      },
+      method: "GET"
     })
     .then(res => res.json())
     .catch(console.log)
@@ -93,6 +100,10 @@ const actions = {
   },
   addOrder (context, order) {
     context.commit('addOrder', order)
+  },
+  nearByCarriers (context, carriers) {
+    console.log('ACTION', carriers);
+    context.commit('setCarriers', carriers)
   }
 }
 

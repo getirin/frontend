@@ -33,6 +33,20 @@
         }"
         >
       </google-marker>
+      <!-- <google-marker
+        v-for="m in markers"
+        :key="m.id"
+        :position="m.position"
+        :clickable="true"
+        :draggable="false"
+        @click="center=m.position"
+        :icon= "{
+          anchor: {x: m.position.lat, y: m.position.lng},
+          url: `/static/logo.svg`,
+          scaledSize: {b: 'px', f: 'px', height: 60, width: 80}
+        }"
+        >
+      </google-marker> -->
     </google-map>
     <div v-if="isLoggedIn">
       <div class="display-flex"
@@ -56,10 +70,6 @@
             <f7-accordion-content>
               <f7-block block block-strong>
                 <p>Alışveriş listeniz {{ list.createdAt | moment("from", "now") }} önce {{ statusGenerator(list.status) }}</p>
-
-                <!-- <p v-if="list.status !== 0">Alışverişinizi gerçekleştiren kurye:
-                  <f7-link :href="carrierPath(list.carrier)">{{ list.carrier.name }}</f7-link>
-                </p> -->
                 <div class="data-table">
                   <table>
                     <thead>
@@ -154,26 +164,64 @@ export default {
       'isInitialized',
       'currentLocation',
       'order',
-      'items'
+      'items',
+      'getNearByCarriers'
     ]),
     mapSize: function () {
       return `height: ${this.isLoggedIn ? 50 : 100}%`
     }
   },
-  created() {
+  async created() {
     const loginScreenToast = this.$f7.toast.create({
       text: 'Hoşgeldin, şu anda etrafında 20 adet kuryemiz var, bir alışveriş listesi oluşturup en kısa sürede bunları sana getirebilirler. Hemen tıkla ve giriş yap!',
       closeButton: true,
       closeButtonText: 'Giriş Yap',
       closeButtonColor: 'green',
       on: {
-          close: () => {
-            this.$f7.loginScreen.open('#login-screen')
-          },
-        }
+        close: () => {
+          this.$f7.loginScreen.open('#login-screen')
+        },
+      }
     });
     if (!this.isLoggedIn) {
       loginScreenToast.open()
+    } else {
+      let {token, location} = this.$store.state
+      console.log(token, location);
+
+      const nearByCarriers = await fetch(`${BASE_URL}/carrier/nearby`, {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': token,
+          },
+          method: "POST",
+          body: JSON.stringify({
+            "location": {
+              "lat": location.latitude,
+              "lng": location.longitude
+            },
+            "maxDistance": 10000,
+            "minDistance": 0
+          })
+        })
+        .then(res => res.json())
+        .then(res => this.$store.dispatch('nearByCarriers', res))
+        .catch(console.log)
+
+        this.markers = [
+          ...this.markers,
+          ...this.getNearByCarriers.map(carrier => {
+                return {
+                  id: carrier.id,
+                  position: {
+                    lat: carrier.lastSeen.lat,
+                    lng: carrier.lastSeen.lng
+                  }
+                }
+            })
+        ]
+        window.nearByCarriers = nearByCarriers
     }
   },
   components: {
