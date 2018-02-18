@@ -20,33 +20,19 @@
         >
       </google-marker>
       <google-marker
-        v-for="m in markers"
+        v-for="m in Object.values(carriers)"
         :key="m.id"
-        :position="m.position"
+        :position="m.lastSeen"
         :clickable="true"
         :draggable="false"
-        @click="center=m.position"
+        @click="center=m.lastSeen"
         :icon= "{
-          anchor: {x: m.position.lat, y: m.position.lng},
+          anchor: {x: m.lastSeen.lat, y: m.lastSeen.lng},
           url: `/static/logo.svg`,
           scaledSize: {b: 'px', f: 'px', height: 60, width: 80}
         }"
         >
       </google-marker>
-      <!-- <google-marker
-        v-for="m in markers"
-        :key="m.id"
-        :position="m.position"
-        :clickable="true"
-        :draggable="false"
-        @click="center=m.position"
-        :icon= "{
-          anchor: {x: m.position.lat, y: m.position.lng},
-          url: `/static/logo.svg`,
-          scaledSize: {b: 'px', f: 'px', height: 60, width: 80}
-        }"
-        >
-      </google-marker> -->
     </google-map>
     <div v-if="isLoggedIn">
       <div class="display-flex"
@@ -66,6 +52,7 @@
             accordion-item
             v-for="list in order"
             :title="list.title"
+            :key="list.id"
           >
             <f7-accordion-content>
               <f7-block block block-strong>
@@ -144,9 +131,6 @@ export default {
         .map(i => i.price)
         .reduce((a, b) => a + b, 0)
     },
-    carrierPath (carrier) {
-      return `/carrier/${carrier.slug}`
-    },
     createShoppingList () {
       if (this.$store.state.logged) {
         this.$f7.popup.open('#createShoppingListPopup')
@@ -165,7 +149,7 @@ export default {
       'currentLocation',
       'order',
       'items',
-      'getNearByCarriers'
+      'carriers'
     ]),
     mapSize: function () {
       return `height: ${this.isLoggedIn ? 50 : 100}%`
@@ -209,18 +193,7 @@ export default {
         .then(res => this.$store.dispatch('nearByCarriers', res))
         .catch(console.log)
 
-        this.markers = [
-          ...this.markers,
-          ...this.getNearByCarriers.map(carrier => {
-                return {
-                  id: carrier.id,
-                  position: {
-                    lat: carrier.lastSeen.lat,
-                    lng: carrier.lastSeen.lng
-                  }
-                }
-            })
-        ]
+        this.$socket.emit('login', this.$store.state.token)
         window.nearByCarriers = nearByCarriers
     }
   },

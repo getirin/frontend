@@ -202,6 +202,10 @@
     },
     created () {
       this.getCurrentLocation()
+      if (this.$store.state.token) {
+        this.$socket.emit('login', this.$store.state.token)
+      }
+
     }
   }
 </script>

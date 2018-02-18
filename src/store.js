@@ -4,7 +4,9 @@ const set = (key, value) => window.localStorage.setItem(key, JSON.stringify(valu
 
 window.BASE_URL = 'https://api.getir.in'
 
+
 const state = {
+  connect: false,
   logged: false,
   location: {},
   init: false,
@@ -13,7 +15,12 @@ const state = {
   items: [],
   order: [],
   basket: [], // New basket
-  carriers: []
+  carriers: {
+    "5a89090ce4545a00149cc493": {
+      lastSeen: { lat: 41, lng: 29 },
+      name: "cagatay-carrrier"
+    }
+  }
 }
 
 const getters = {
@@ -33,12 +40,99 @@ const getters = {
   order (state) {
     return state.order
   },
-  getNearByCarriers (state) {
+  carriers (state) {
     return state.carriers
   }
 }
 
 const mutations = {
+  SOCKET_CONNECT: (state, status) => {
+    state.connect = true
+  },
+  SOCKET_CONNECT_ERROR: (state, status) => {
+    state.connect = false
+  },
+  SOCKET_LOCATION: (state, carrier) => {
+    state.carriers = {
+      ...state.carriers,
+      ...carrier[0]
+    }
+  },
+  SOCKET_REQUEST: (state, payload) => {
+
+    let order = state.order.find(o => o.id === payload.order_id)
+
+    if (order) {
+
+      let g = vue.$f7.actions.create({
+        buttons: [
+          {
+            text: `${payload.name} sizin ${order.title} isimi alışveriş listenizi derleme isteği gönderdi`,
+            label: true
+          },
+          {
+            text: 'KABUL ET',
+            onClick: function () {
+              const order = fetch(`${BASE_URL}/request/${payload.request_id}/accept`, {
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+                  'Authorization': token,
+                },
+                method: 'PATCH'
+              })
+              .then(res => res.json())
+              .then(() => {
+                vue.$f7.dialog.alert('Kuryeyi onayladınız.')
+              })
+              .catch(() => {
+                vue.$f7.dialog.alert('Kuryeyi onaylarken hata oluştu.')
+              })
+            }
+          },
+          {
+            text: 'REDDET',
+            color: 'red',
+            onClick: function () {
+              const order = fetch(`${BASE_URL}/request/${payload.request_id}/reject`, {
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+                  'Authorization': token,
+                },
+                method: 'PATCH'
+              })
+              .then(res => res.json())
+              .then(() => {
+                vue.$f7.dialog.alert('Kuryeyi reddettiniz.')
+              })
+              .catch(() => {
+                vue.$f7.dialog.alert('Kuryeyi reddederken hata oluştu.')
+              })
+            }
+          },
+        ]
+      })
+      g.open()
+
+    }
+    const orderUpdate = fetch(`${BASE_URL}/order/list`, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': token,
+      },
+      method: "GET"
+    })
+    .then(res => res.json())
+    .catch(console.log)
+
+    state.order = orderUpdate
+  },
+  SOCKET_FINISH: (state, {order_id}) => {
+    let order = state.order.find(o => o.id === order_id)
+    vue.$f7.dialog.alert('Alışverişiniz teslim edildi!')
+  },
   logIn: (state, {token, username, order}) => {
     state.token = token
     state.order = order
@@ -58,7 +152,7 @@ const mutations = {
     state.order = orders;
   },
   setCarriers: (state, carriers) => {
-    state.carriers = carriers
+    // state.carriers
   }
 }
 

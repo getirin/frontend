@@ -47,7 +47,7 @@ export default {
     }
   },
   created() {
-    this.$store.dispatch('getInitialData')
+    this.$store.dispatch('getInitialData')    
   }
 }
 </script>

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
+import VueSocketio from 'vue-socket.io'
 // 3th. parties. Such as maps, UI kit etc.
 import * as VueGoogleMaps from 'vue2-google-maps'
 import Framework7 from 'framework7/dist/framework7.esm.bundle.js'
@@ -30,7 +30,7 @@ Vue.use(Vuex)
 
 Vue.use(Moment, {
   moment
-});
+})
 
 // Init Google Maps
 Vue.use(VueGoogleMaps, {
@@ -51,6 +51,13 @@ Vue.component('google-cluster', VueGoogleMaps.Cluster)
 
 // Bind store to vuex
 const store = new Vuex.Store(storeOptions)
+
+// Bind socket.io client to vuex
+if (process.env.NODE_ENV !== 'production') {
+  Vue.use(VueSocketio, 'http://localhost:3000', store)
+} else {
+  Vue.use(VueSocketio, 'https://api.getir.in', store)
+}
 
 const vue = new Vue({
   el: '#app',
