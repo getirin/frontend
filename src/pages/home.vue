@@ -55,7 +55,7 @@
           >
             <f7-accordion-content>
               <f7-block block block-strong>
-                <p>Alışveriş listeniz {{ list.createdAt | moment("from", "now") }} önce {{ list.status ? 'teslim edildi' : 'iptal edildi' }}</p>
+                <p>Alışveriş listeniz {{ list.createdAt | moment("from", "now") }} önce {{ statusGenerator(list.status) }}</p>
 
                 <!-- <p v-if="list.status !== 0">Alışverişinizi gerçekleştiren kurye:
                   <f7-link :href="carrierPath(list.carrier)">{{ list.carrier.name }}</f7-link>
@@ -105,6 +105,27 @@ import CreateList from '../components/createList'
 
 export default {
   methods: {
+    statusGenerator (status) {
+      switch (status) {
+        case 0:
+          return 'kuryelere bildirim gönderildi..'
+          break;
+        case 1:
+          return 'bir kuryenin isteği karşılama durumu mevcut..'
+          break;
+        case 2:
+          return 'alışveriş isteği sizin tarafınızdan kapatıldı..'
+          break;
+        case 3:
+          return 'alışveriş isteği kurye tarafınızdan reddedildi..'
+          break;
+        case 4:
+          return 'alışveriş başarıyla gerçekleşti..'
+          break;
+        default:
+          return 'HATA'
+      }
+    },
     zoomChange(event) {
       this.zoom = event;
     },

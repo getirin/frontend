@@ -11,7 +11,8 @@ const state = {
   token: null,
   username: '',
   items: [],
-  order: []
+  order: [],
+  basket: [] // New basket
 }
 
 const getters = {

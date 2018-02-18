@@ -3,72 +3,80 @@
     <f7-page>
       <f7-navbar title="Alışveriş Listesi Oluştur">
         <f7-nav-right>
-          <f7-link popup-close @click="clearOrderCreatePopup">Kapat</f7-link>
+          <f7-link popup-close>Kapat</f7-link>
         </f7-nav-right>
       </f7-navbar>
-      <div v-if="isProcessing" class="display-flex" style="flex:1;align-items: center;justify-content: center;height: 50%">
-        <f7-progressbar infinite color="multi"></f7-progressbar>
-        <f7-preloader style="flex:1, align-items: center;justify-content: center;" color="green" size="44px"></f7-preloader>
-      </div>
-      <div v-if="isDone">
-        <h4>Başarılı</h4>
-        <p>Alışveriş listen başarıyla oluşturuldu, etrafındaki kuryelere iletildi..</p>
-        <p>Alışveriş listeni bir kurye hazırlamaya başlarsa anlık olarak takip edebileceksin.</p>
-      </div>
-      <f7-block v-if="!isSubmitted" inset>
-        Alışveriş listenizi şu anki konumunuza göre veya daha önceki konumlarınıza göre verebilirsiniz.
-        <f7-button big style="margin-top: 5px" @click="locationPicker.open()">Konum seç</f7-button>
-          <div class="block-title" style="font-weight: bold" v-if="this.selectedLocation">{{this.selectedLocation.full_adress}}</div>
 
-          <div class="block-title" style="text-transform: none !important;">Ürün seçimi</div>
-          <div class="list no-hairlines-md">
-            <ul>
-              <li>
-                <div class="item-content item-input">
-                  <div class="item-inner">
-                    <div class="item-input-wrap">
-                      <input type="text" placeholder="Ne arzu edersiniz?" readonly="readonly" id="pick-item"/>
-                    </div>
-                  </div>
-                </div>
-              </li>
-            </ul>
-            <f7-button big style="margin-top: 5px" @click="addItem(this)">Ürünü alışveriş listeme ekle</f7-button>
-          </div>
+      <f7-block inset>
+        Alışveriş listenizi şu anki konumunuza göre veya daha önceki konumlarınıza göre verebilirsiniz.
+        <!-- Location Picker  -->
+        <f7-button big @click="selectLocationActionSheet()">Konum seç</f7-button>
+        <!-- Location Picker  -->
+
+        <f7-list form>
+          <f7-list-item>
+            <f7-label>Başlık</f7-label>
+            <f7-input :value="title" @input="title = $event.target.value" type="text" placeholder="Alışveriş listenize bir başlık giriniz" clear-button></f7-input>
+          </f7-list-item>
         </f7-list>
-        <div class="data-table" v-if="totalOrderPrice > 0">
+
+        <f7-list form>
+          <f7-list-item>
+            <f7-label>Ürün Seçin</f7-label>
+            <f7-input type="select" :value="selectedItem" @input="selectedItem = $event.target.value" >
+              <option v-for="item in items" :value="item.id" :key="item.id" selected>{{item.name}}</option>
+            </f7-input>
+          </f7-list-item>
+          <f7-list-item>
+            <f7-label>Ürün Adedi</f7-label>
+            <f7-input type="select" :value="count" @input="count = $event.target.value">
+              <option value="1" selected>1</option>
+              <option value="2" >2</option>
+              <option value="3" >3</option>
+              <option value="4" >4</option>
+              <option value="5" >5</option>
+              <option value="6" >6</option>
+              <option value="7" >7</option>
+              <option value="8" >8</option>
+              <option value="9" >9</option>
+              <option value="10" >10</option>
+            </f7-input>
+          </f7-list-item>
+        </f7-list>
+        <f7-button big style="margin-top: 5px" @click="addItem()">Ürünü alışveriş listeme ekle</f7-button>
+
+
+        <div class="data-table">
           <table>
             <thead>
               <tr>
                 <th class="label-cell">Ürün</th>
                 <th class="numeric-cell">Birim</th>
-                <th class="numeric-cell">Kaldır</th>
                 <th class="numeric-cell">Tutar (₺)</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in order">
-                <td class="label-cell">{{ item.name }}</td>
+              <tr v-for="item in basket" :key="item.product">
+                <td class="label-cell">{{ itemDetail(item.product).name }}</td>
                 <td class="numeric-cell">x{{ item.count }}</td>
-                <td class="numeric-cell" ><f7-button @click="removeItemFromOrderList(item)" style="border: none !important;" icon-f7="delete_round"></f7-button></td>
-                <td class="numeric-cell">{{ item.price }} ₺</td>
+                <td class="numeric-cell">{{ itemDetail(item.product).price }} ₺</td>
               </tr>
             </tbody>
             <tfoot>
               <tr>
                 <td class="label-cell">Toplam alışveriş listesi tutarı</td>
-                <td class="label-cell"></td>
-                <td class="label-cell"></td>
-                <td class="numeric-cell">{{totalOrderPrice}} ₺</td>
+                <td class="numberic-cell"></td>
+                <td class="numeric-cell">{{total}} ₺</td>
               </tr>
             </tfoot>
           </table>
         </div>
+        <!-- Table -->
       </f7-block>
+      <f7-fab color="pink" @click="putOrder()">
+        <f7-icon f7="check"></f7-icon>
+      </f7-fab>
     </f7-page>
-    <f7-fab color="pink" @click="putOrder()">
-      <f7-icon f7="check"></f7-icon>
-    </f7-fab>
   </f7-view>
 </template>
 
@@ -79,79 +87,38 @@
   export default {
     computed: {
       ...mapGetters([
-        'items'
+        'items',
       ]),
     },
     data() {
       return {
-        order: [],
-        totalOrderPrice: 0,
-        itemPicker: null,
-        isSubmitted: false,
-        isProcessing: false,
-        isDone: false,
-        locationPicker: null,
-        selectedLocation: {},
+        title: '',
+        selectedItem: '',
+        count: 0,
+        selectedLocation: null,
         location: null,
-        orderList: [
-          {
-            id: "123",
-            name: "Alışveriş 1",
-            location: {
-              latitude: 12,
-              longitude: 12,
-              full_adress: 'Denizli'
-            }
-          },
-          {
-            id: "321",
-            name: "Alışveriş 2",
-            location: {
-              latitude: 12,
-              longitude: 12,
-              full_adress: 'İzmir'
-            }
-          }
-        ]
+        basket: [],
+        total: 0
       }
     },
     methods: {
-      clearOrderCreatePopup () {
-        this.order = []
-        this.totalOrderPrice = 0
-        this.itemPicker = null
-        this.isSubmitted = false
-        this.isProcessing = false
-        this.isDone = false
-        this.locationPicker = null
-        this.selectedLocation = {}
-      },
       async putOrder () {
-        if (this.order.length === 0 || Object.keys(this.selectedLocation).length === 0) {
-          this.$f7.dialog.alert('Lütfen adresi ve ürünleri seçiniz')
-          return
-        }
-        if (!this.isSubmitted) {
-          this.isSubmitted = true
-          this.isProcessing = true
-          console.log('ORDER', this.order);
-          console.log('LOCATION', this.selectedLocation)
-          console.log('TOTAL', this.totalOrderPrice)
-          let {token, username} = this.$store.state
+        let { title, basket } = this
+        let { location, token } = this.$store.state
+        if (title.trim().length === 0) {
+          this.$f7.dialog.alert('Başlık giriniz')
+        } else if (basket.length === 0) {
+          this.$f7.dialog.alert('Alışveriş listeniz boş')
+        } else {
           let body = {
-            "title": `alışveriş listem ${new Date()}`,
-            "items": this.order.map(o => {
-              return {
-                product: o.id,
-                count: o.count
-              }
-            }),
-            "address": this.selectedLocation,
-            "destination": {
-              "lat": this.selectedLocation.latitude,
-              "lng": this.selectedLocation.longitude
+            title,
+            items: basket,
+            address: this.$store.state.location,
+            destination: {
+              lat: location.latitude,
+              lng: location.longitude
             },
-            "status": 0
+            status: 0
           }
           const order = await fetch(`${BASE_URL}/order`, {
               headers: {
@@ -168,70 +135,46 @@
             body.updatedAt = createdAt
             body.id = id
             this.$store.dispatch('addOrder', body)
+            this.$f7.dialog.alert('Alışveriş listeniz oluşturuldu, yakındaki kuryelere bildirim gönderildi..')
+            vue.$f7.popup.close('#createShoppingListPopup')
           })
           .catch(console.log)
-
-          // {
-          //   "title": `${this.$store.state.username} - ${moment(new Date()).from('now')} önce oluşturuldu.`,
-          //   "items": this.order.map(o => {
-          //     return {
-          //       product: o.id,
-          //       count: o.count
-          //     }
-          //   }),
-          //   "address": this.selectedLocation,
-          //   "destination": {
-          //     "lat": this.selectedLocation.latitude,
-          //     "lng": this.selectedLocation.longitude
-          //   },
-          //   "status": 0,
-          //   "totalPrice": this.totalOrderPrice
-          // }
-          // console.log(order);
-
-
-          setTimeout(() => {
-            this.isProcessing = false
-            this.isDone = true
-          }, 5 * 1000);
-        } else {
-          return
         }
-
       },
-      removeItemFromOrderList (item) {
-        const originalItem = this.items.find(i => i.name === item.name)
-        let order = this.order.find(o => o.name === item.name)
-        if (order && order.count > 0) {
-          this.$set(order, 'count', --order.count)
-          this.$set(order, 'price', order.price - originalItem.price)
-          this.totalOrderPrice -= originalItem.price
-        } else {
-          this.order = this.order.filter(o => o.name !== item.name)
-        }
+      itemDetail (productId) {
+        return this.items.find(i => i.id === productId)
       },
       addItem () {
-        if (!this.itemPicker.getValue()) {
-          this.$f7.dialog.alert('Lütfen bir ürün seçiniz')
-          return
-        }
-        let [name, count] = this.itemPicker.getValue()
-        count = parseFloat(count.split('x')[1])
-        const item = this.items.find(i => i.name === name)
-        let order = this.order.find(o => o.name === name)
-
-        if (order) {
-          this.$set(order, 'count', count + order.count)
-          this.$set(order, 'price', order.price + (count * item.price))
-          this.totalOrderPrice += (count * item.price)
-        } else {
-          this.order.push({
-            id: item.id,
-            name: item.name,
-            count,
-            price: (count * item.price)
+        let check = this.basket.find(b => b.product === this.selectedItem)
+        if (!check) {
+          this.basket.push({
+            product: this.selectedItem,
+            count: this.count
           })
+        } else {
+          this.$f7.dialog.alert('Bu üründen daha önce eklediniz..')
         }
+      },
+      selectLocationActionSheet () {
+        this.$f7.actions.create({
+          buttons: [
+            {
+              text: 'Konum seç',
+              label: true
+            },
+            {
+              text: 'Şu anki konum',
+              bold: true,
+              onClick: () => {
+                this.selectedLocation = this.$store.state.location
+              },
+            },
+            {
+              text: 'İptal',
+              color: 'red'
+            },
+          ]
+        }).open()
       },
       getCurrentLocation () {
         if (!navigator.geolocation) {
@@ -246,73 +189,19 @@
             this.$f7.dialog.alert('Lokasyon iznini almadan sana yardımcı olamam :(')
           }
         });
-      },
+      }
     },
     watch: {
-      order: function () {
-        this.totalOrderPrice = this.order
-          .map(o => o.price)
+      basket: function () {
+        this.total = this.basket
+          .map(o => {
+            return this.itemDetail(o.product).price * o.count
+          })
           .reduce((a, b) => a + b, 0)
       }
     },
-    created() {
+    created () {
       this.getCurrentLocation()
-      setTimeout( () => {
-        this.itemPicker = this.$f7.picker.create({
-           inputEl: '#pick-item',
-             rotateEffect: true,
-             cols: [
-               {
-                 textAlign: 'left',
-                 values: this.items
-                  .map(i => i.name)
-               },
-               {
-                 values: ('x1 x2 x3 x4 x5 x6 x7 x8 x9 x10').split(' ')
-               },
-             ]
-         });
-
-         let orderList = this.orderList.map(o => {
-           return {
-             text: o.name,
-             onClick: () => {
-               this.selectedLocation = o.location
-             },
-           }
-         })
-
-         this.locationPicker = this.$f7.actions.create({
-            buttons: [
-              [
-                {
-                  text: 'Ürünlerinizi nereye göndermemizi istersiniz?',
-                  label: true
-                },
-                {
-                  text: 'Şu anki konumuma istiyorum',
-                  onClick: () => {
-                    this.selectedLocation = this.$store.state.location
-                  }
-                }
-              ],
-              [
-                {
-                  text: 'Son adresler',
-                  label: true
-                },
-                ...orderList
-              ],
-              [
-                {
-                  text: 'İptal',
-                  color: 'red'
-                }
-              ]
-            ],
-          });
-      }, 10);
-
     }
   }
 </script>

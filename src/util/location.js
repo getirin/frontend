@@ -7,23 +7,7 @@ export default async ({ latitude, longitude }) => {
   var locationObj = {};
   locationObj.latitude = latitude;
   locationObj.longitude = longitude;
-  locationObj.full_adress = response.results[0].formatted_address
-
-  response.results.forEach(location => {
-    if (location.types[0] === location.address_components[0]) {
-      eval(`locationObj.${location.types[0]} = location.address_components[0];`)
-    } else {
-      location.address_components.forEach((adresses) => {
-        if (adresses.types[0] == location.types[0] || adresses.types[1] == location.types[0]) {
-          if (adresses.long_name) {
-            eval(`locationObj.${location.types[0]} = adresses.long_name;`)
-          } else {
-            eval(`locationObj.${location.types[0]} = adresses.short_name;`)
-          }
-        }
-      })
-    }
-  })
+  locationObj.full_address = response.results[0].formatted_address
 
   return locationObj
 }
